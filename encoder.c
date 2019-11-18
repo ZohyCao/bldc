@@ -82,6 +82,8 @@ static float last_enc_angle = 0.0;
 uint16_t spi_val = 0;
 uint32_t spi_error_cnt = 0;
 float spi_error_rate = 0.0;
+static int32_t cumulative_encoder_counts = 0;
+static uint32_t last_encoder_counts = 0;
 
 float sin_gain = 0.0;
 float sin_offset = 0.0;
@@ -321,6 +323,9 @@ float encoder_read_deg(void) {
 		break;
 
 	case ENCODER_MODE_AS5047P_SPI:
+		angle = ((float)cumulative_encoder_counts * 360.0) / 16384.0;  // A.G.
+    	//angle = last_enc_angle;
+		break;
 	case RESOLVER_MODE_AD2S1205:
 		angle = last_enc_angle;
 		break;
@@ -362,6 +367,16 @@ float encoder_read_deg(void) {
 	}
 
 	return angle;
+}
+
+int32_t encoder_cumulative_counts(void) {
+
+	if (mode==ENCODER_MODE_AS5047P_SPI)
+	{
+		return cumulative_encoder_counts;
+	}
+
+	return 0;
 }
 
 /**
@@ -450,11 +465,28 @@ void encoder_tim_isr(void) {
 		pos = pos >> 4;
 		pos &= 0x0FFF; // check if needed
 
+
+	// Handle encoder rollover up or down.
+	if(last_encoder_counts < (16384 / 4) && pos > (3 * 16384 / 4))
+	{
+		cumulative_encoder_counts -= 16384;
+	} else
+	if(last_encoder_counts > (3 * 16384 / 4) && pos < (16384 / 4))
+	{
+		cumulative_encoder_counts += 16384;
+	}
+
+  // Now account for actual reading changes
+	cumulative_encoder_counts += (pos - last_encoder_counts);
+	last_encoder_counts = pos;
+
 		if((RDVEL != 0) && (DOS != 0) && (LOT != 0)) {
 			last_enc_angle = ((float)pos * 360.0) / 4096.0;
 		}
 	}
 }
+
+
 
 /**
  * Set the number of encoder counts.

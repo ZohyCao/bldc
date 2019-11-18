@@ -31,6 +31,7 @@ void encoder_init_sincos(float sin_gain, float sin_offset,
 						 float cos_gain, float cos_offset, float sincos_filter_constant);
 bool encoder_is_configured(void);
 float encoder_read_deg(void);
+int32_t encoder_cumulative_counts(void);
 void encoder_reset(void);
 void encoder_tim_isr(void);
 void encoder_set_counts(uint32_t counts);

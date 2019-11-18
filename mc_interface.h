@@ -37,7 +37,7 @@ mc_state mc_interface_get_state(void);
 void mc_interface_set_duty(float dutyCycle);
 void mc_interface_set_duty_noramp(float dutyCycle);
 void mc_interface_set_pid_speed(float rpm);
-void mc_interface_set_pid_pos(float pos);
+void mc_interface_set_pid_pos(float pos,float rpm);
 void mc_interface_set_current(float current);
 void mc_interface_set_brake_current(float current);
 void mc_interface_set_current_rel(float val);
@@ -75,6 +75,9 @@ float mc_interface_get_last_sample_adc_isr_duration(void);
 void mc_interface_sample_print_data(debug_sampling_mode mode, uint16_t len, uint8_t decimation);
 float mc_interface_temp_fet_filtered(void);
 float mc_interface_temp_motor_filtered(void);
+
+void update_override_limits(volatile mc_configuration *conf);
+
 float mc_interface_get_battery_level(float *wh_left);
 float mc_interface_get_speed(void);
 float mc_interface_get_distance(void);
